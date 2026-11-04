@@ -1,0 +1,205 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex"></head><body>
+<title>Same Market, Different Decisions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500&display=swap">
+<style>
+/* Layout: one calm column, styled like a quarterly fund statement. No red or green anywhere: colour must not act as a second treatment. */
+:root{--bg:#f3f5f6;--paper:#fff;--ink:#17242b;--muted:#566872;--line:#d3dbdf;--accent:#1f5673;--accent-ink:#fff;--soft:#e6eef2;--warn:#6a5a1f;--warn-bg:#f6f0d9;
+--display:"IBM Plex Serif",Georgia,serif;--body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10181d;--paper:#18232a;--ink:#e6edf0;--muted:#9fb0b9;--line:#2f3f48;--accent:#7fb8d6;--accent-ink:#0d171c;--soft:#22323b;--warn:#e7d690;--warn-bg:#39331a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10181d;--paper:#18232a;--ink:#e6edf0;--muted:#9fb0b9;--line:#2f3f48;--accent:#7fb8d6;--accent-ink:#0d171c;--soft:#22323b;--warn:#e7d690;--warn-bg:#39331a;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:640px;margin:0 auto;display:grid;gap:16px}
+header{display:flex;justify-content:space-between;gap:12px;font:500 12px/1.4 var(--mono);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.sheet{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:24px;display:grid;gap:16px;min-width:0}
+h1,h2{font-family:var(--display);font-weight:500;line-height:1.2;margin:0;text-wrap:balance}h1{font-size:28px}h2{font-size:22px}
+p,ul,ol{margin:0}ul,ol{padding-left:20px;display:grid;gap:6px}
+.muted{color:var(--muted);font-size:14px}.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.state{border-block:1px solid var(--line);padding-block:14px;display:grid;gap:10px}
+.state p{font-size:18px}.state strong{font-weight:600}
+.news{font-family:var(--display);font-size:19px}.prob{background:var(--soft);padding:12px 14px;border-radius:3px}
+fieldset{border:0;padding:0;margin:0;display:grid;gap:8px;min-width:0}legend{font-weight:600;padding:0;margin-bottom:8px}
+.alloc{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.alloc label,.opt{cursor:pointer}.alloc input,.opt input{position:absolute;opacity:0}
+.alloc span{display:block;text-align:center;padding:12px 0;border:1px solid var(--line);border-radius:3px;font:500 15px var(--mono)}
+.alloc input:checked+span{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.alloc input:focus-visible+span,.opt input:focus-visible+span,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opt{display:block;position:relative}.opt span{display:block;padding:10px 12px;border:1px solid var(--line);border-radius:3px}
+.opt input:checked+span{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.scale{display:grid;grid-template-columns:repeat(auto-fit,minmax(38px,1fr));gap:4px}.scale .opt span{text-align:center;padding:9px 0;font-family:var(--mono)}
+button{font:600 16px var(--body);background:var(--accent);color:var(--accent-ink);border:0;border-radius:3px;padding:12px 18px;cursor:pointer;justify-self:start}
+button:disabled{opacity:.45;cursor:not-allowed}
+input[type=number],textarea{font:16px var(--body);background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:3px;padding:10px;width:100%;max-width:100%;box-sizing:border-box}
+table{border-collapse:collapse;width:100%;font-size:15px}td,th{text-align:left;padding:7px 0;border-bottom:1px solid var(--line)}td:last-child,th:last-child{text-align:right}
+.note{background:var(--warn-bg);color:var(--warn);padding:10px 12px;border-radius:3px;font-size:14px}
+.err{color:var(--warn);font-size:15px;font-weight:600}.code{font:500 20px var(--mono);letter-spacing:.06em;user-select:all}
+.wrap{overflow-x:auto}.bar{height:4px;background:var(--line);border-radius:2px}.bar i{display:block;height:100%;background:var(--accent);border-radius:2px}
+</style>
+<main>
+<header><span>Decision Theory study</span><span id="step"></span></header>
+<div class="bar"><i id="prog" style="width:0"></i></div>
+<div id="testnote" class="note" hidden></div>
+<section class="sheet" id="view" aria-live="polite"></section>
+</main>
+<script>
+"use strict";
+/* ---------- CONFIG: edit these lines before going live ---------- */
+const CONFIG={
+  ENDPOINT:"https://script.google.com/macros/s/AKfycbwQkyLpNmdGl_9PMWV5d_qGHyuOxY2krJINx4GL2UA77lND9GEx6D2SBsgAbIf0swyk/exec",                     // Google Apps Script web-app URL. Empty = test mode, nothing is sent.
+  PRIZE:"a box of chocolates",      // what the highest score wins
+  VERSION:"2.0"
+};
+/* ---------- Scenario: fixed, identical for every participant ---------- */
+const START=10000, ALLOC=[0,25,50,75,100];
+const RET=[-0.05,-0.12,0.06,-0.09,0.22];
+const NEWS=["The first quarter is about to start. Analysts are divided on the outlook for US equities.",
+ "Q1: Corporate earnings came in below expectations.",
+ "Q2: Recession fears spread through equity markets.",
+ "Q3: Equities recovered part of their losses as inflation eased.",
+ "Q4: A new wave of selling hit equity markets."];
+const PROB={p:30,down:9,up:5}; // shown before the decision for Q4: 30% -9%, 70% +5%
+const GAMBLES=[2,3,4,5,6,7];
+/* ---------- Pure functions (mirrored and tested in analysis.py) ---------- */
+const fmtCHF=v=>"CHF "+Math.round(Math.abs(v)).toLocaleString("de-CH").replace(/[’']/g,"'");
+const pct=v=>(Math.round(Math.abs(v)*10)/10).toFixed(1)+"%";
+function wealthPath(weights){const v=[START];RET.forEach((r,i)=>v.push(v[i]*(1+weights[i]/100*r)));return v}
+function fundIndex(q){let x=1;for(let i=0;i<q;i++)x*=1+RET[i];return x}
+function score(weights){const r=RET.map((m,i)=>weights[i]/100*m),n=r.length,m=r.reduce((a,b)=>a+b,0)/n;
+  const sd=Math.sqrt(r.reduce((a,b)=>a+(b-m)**2,0)/(n-1));
+  if(sd===0||Math.abs(m)<1e-12)return{mean:m,sd,score:0};
+  return{mean:m,sd,score:m>0?m/sd:m*sd}}
+/* Value frame. L = loss wording, R = retained wording. Both state the same two numbers' worth of information. */
+function frameLines(vf,fund,value){
+  /* Round the retained figures once, derive the loss figures from them: 100% and CHF 10,000 always add up exactly. */
+  const vR=Math.round(value), pv=vR-START, keep=Math.round(vR/START*1000)/10, fundKeep=Math.round(fund*1000)/10;
+  const chg=Math.abs(100-keep).toFixed(1)+"%", fundChg=Math.abs(100-fundKeep).toFixed(1)+"%";
+  if(vf==="L"){
+    const a=`Since the start, the fund has lost <strong class="num">${fundChg}</strong> of its value.`;
+    const b=pv<0?`Your portfolio has lost <strong class="num">${fmtCHF(pv)}</strong> (${chg}).`
+      :pv>0?`Your portfolio has gained <strong class="num">${fmtCHF(pv)}</strong> (${chg}).`
+      :`Your portfolio has neither lost nor gained value.`;
+    return[a,b]}
+  const a=`Since the start, the fund has retained <strong class="num">${fundKeep.toFixed(1)}%</strong> of its value.`;
+  const b=pv<0?`Your portfolio has retained <strong class="num">${fmtCHF(vR)}</strong> (${keep.toFixed(1)}%) of its starting value.`
+    :pv>0?`Your portfolio is now worth <strong class="num">${fmtCHF(vR)}</strong> (${keep.toFixed(1)}% of its starting value).`
+    :`Your portfolio has retained its full starting value.`;
+  return[a,b]}
+function probLine(pf){return pf==="N"
+  ?`Scenario estimate for next quarter: a <strong>${PROB.p}% chance that the fund falls by ${PROB.down}%</strong>. Otherwise it rises by ${PROB.up}%.`
+  :`Scenario estimate for next quarter: a <strong>${100-PROB.p}% chance that the fund rises by ${PROB.up}%</strong>. Otherwise it falls by ${PROB.down}%.`}
+/* ---------- State ---------- */
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const LIVE=!!CONFIG.ENDPOINT;
+const KEY=LIVE?"smdd_live":"smdd_test";
+function randomToken(){const a="abcdefghijklmnopqrstuvwxyz0123456789",r=crypto.getRandomValues(new Uint8Array(10));return[...r].map(x=>a[x%a.length]).join("")}
+/* Balanced assignment comes from the sheet script. If it cannot be reached, assign by coin flip and record that. */
+async function assignCell(){try{const c=new AbortController(),t=setTimeout(()=>c.abort(),6000);
+  const r=await fetch(CONFIG.ENDPOINT+"?action=assign",{signal:c.signal});clearTimeout(t);const j=await r.json();
+  if(Number.isInteger(j.cell)&&j.cell>=0&&j.cell<4)return{cell:j.cell,how:"server"}}catch(e){}
+  return{cell:crypto.getRandomValues(new Uint8Array(1))[0]%4,how:"client"}}
+let S=store.get(KEY)||null;
+function fresh(cell,mode,assign="test"){return{v:CONFIG.VERSION,token:mode==="live"?randomToken():"test",assign,mode,vFrame:cell&1?"R":"L",pFrame:cell&2?"P":"N",screen:"consent",w:[],rt:[],pre:{},post:{},comp:{attempts:0},t0:Date.now(),claim:null,done:false}}
+const save=()=>store.set(KEY,S);
+async function send(stage,tries=3){
+  if(!LIVE)return true;
+  const body=JSON.stringify({stage,ts:new Date().toISOString(),...S});
+  for(let i=0;i<tries;i++){try{const r=await fetch(CONFIG.ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body});if(r.ok)return true}catch(e){}
+    await new Promise(r=>setTimeout(r,800*(i+1)))}
+  return false}
+/* ---------- Rendering ---------- */
+const V=document.getElementById("view");
+const ORDER=["consent","pre","intro","check","r0","r1","r2","r3","r4","post","end"];
+function go(s){S.screen=s;save();render();window.scrollTo(0,0)}
+function chrome(){const i=ORDER.indexOf(S.screen);document.getElementById("prog").style.width=(i/(ORDER.length-1)*100)+"%";
+  const m=/^r(\d)$/.exec(S.screen);document.getElementById("step").textContent=m?`Quarter ${+m[1]+1} of 5`:""}
+const radios=(name,opts,cls="")=>opts.map((o,i)=>`<label class="opt"><input type="radio" name="${name}" id="${name}_${i}" value="${o[0]}"><span>${o[1]}</span></label>`).join("");
+const val=n=>{const e=document.querySelector(`input[name="${n}"]:checked`);return e?e.value:null};
+function need(names,btn){const f=()=>{btn.disabled=!names.every(val)};V.addEventListener("change",f);f()}
+const R={
+consent(){V.innerHTML=`<h1>Same Market, Different Decisions</h1>
+ <p>We are students in the Decision Theory module. We invite you to take part in a short investment simulation for our course project.</p>
+ <ul><li>It takes about 8 minutes on a phone or laptop.</li><li>Please complete it alone and in one sitting.</li><li>Taking part is voluntary and has no effect on your grade. You can stop at any time.</li>
+ <li>The money and the market scenario are hypothetical. No real money is at risk.</li><li>We store your answers under a random code, without name, e-mail or IP address. Results are reported for groups only.</li>
+ <li>Some details of the study are explained at the end of this session. Please work silently and keep your screen to yourself until then.</li></ul>
+ <p class="muted">For questions, or to have your answers deleted, speak to the project team and quote the claim code from your last screen.</p>
+ <label class="opt"><input type="checkbox" id="ok"><span>I am at least 18, I have read this, and I agree to take part.</span></label>
+ <button id="n" disabled>Start</button>`;
+ const b=n,ok=document.getElementById("ok");ok.onchange=()=>{b.disabled=!ok.checked};b.onclick=()=>{send("consent");go("pre")}},
+pre(){V.innerHTML=`<h2>Two questions about you</h2>
+ <fieldset><legend>In general, how willing are you to take risks? (0 = not at all willing, 10 = very willing)</legend><div class="scale">${radios("risk",[...Array(11).keys()].map(i=>[i,i]))}</div></fieldset>
+ <fieldset><legend>Have you ever invested your own money in shares, funds or ETFs?</legend>${radios("exp",[["yes","Yes"],["no","No"]])}</fieldset>
+ <button id="n">Continue</button>`;need(["risk","exp"],n);n.onclick=()=>{S.pre={risk:+val("risk"),exp:val("exp")};go("intro")}},
+intro(){V.innerHTML=`<h2>How the simulation works</h2>
+ <p>You start with <strong class="num">CHF 10,000</strong>. In each of 5 quarters you choose how much to hold in two assets:</p>
+ <ul><li><strong>Equity fund:</strong> a broadly diversified, currency-hedged fund that tracks the S&amp;P 500.</li><li><strong>Cash:</strong> earns 0%.</li></ul>
+ <p>Each quarter you pick 0%, 25%, 50%, 75% or 100% in the fund. You may raise or lower this every quarter, at no cost. Your choice applies to the coming quarter.</p>
+ <p>The market path is fixed in advance and is the same for every participant. It is a constructed scenario, not a replay of a specific historical period, and you only see each quarter after you have decided.</p>
+ <h2>Your goal: the highest Sharpe ratio</h2>
+ <p>You are scored on risk-adjusted return, so a high return alone is not enough:</p>
+ <p class="prob"><strong>Score = average quarterly return ÷ standard deviation of quarterly returns</strong></p>
+ <ul><li>This is your portfolio's average return over the 5 quarters, divided by how much those returns varied.</li><li>If your average return is negative, Score = average × standard deviation, so extra risk can never improve a losing result.</li><li>If you hold only cash for all 5 quarters, your score is 0.</li></ul>
+ <p class="muted">For orientation: from 1928 to 2025 the S&amp;P 500 returned about 11.9% a year with a standard deviation of about 19.4%, while US T-bills returned about 3.4%. That is a Sharpe ratio of roughly 0.4 a year, or about 0.2 a quarter. Past results do not predict this scenario.</p>
+ <p>The highest score wins ${CONFIG.PRIZE}. Ties are decided by lot.</p>
+ <button id="n">Continue</button>`;n.onclick=()=>go("check")},
+check(){V.innerHTML=`<h2>Quick check</h2><p class="muted">These questions make sure the rules are clear. You can try again.</p>
+ <fieldset><legend>1. Your portfolio is CHF 10,000 with 50% in the fund. The fund falls 10% this quarter. What is your portfolio worth?</legend>${radios("c1",[["a","CHF 9,000"],["b","CHF 9,500"],["c","CHF 10,000"]])}</fieldset>
+ <fieldset><legend>2. Two portfolios have the same average return. Which has the higher score?</legend>${radios("c2",[["a","The one with lower variation in returns"],["b","The one with higher variation in returns"],["c","They always score the same"]])}</fieldset>
+ <fieldset><legend>3. When does your choice for a quarter take effect?</legend>${radios("c3",[["a","On the quarter that just ended"],["b","On the coming quarter"]])}</fieldset>
+ <p id="e" class="err" hidden>At least one answer is wrong. Please check the rules and try again.</p>
+ <button id="n">Check answers</button>`;need(["c1","c2","c3"],n);n.onclick=()=>{S.comp.attempts++;save();
+  if(val("c1")==="b"&&val("c2")==="a"&&val("c3")==="b"){send("comprehension");go("r0")}else e.hidden=false}},
+end(){const w=S.w,v=wealthPath(w),s=score(w),b=score([100,100,100,100,100]);
+ if(!S.claim){const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789",r=crypto.getRandomValues(new Uint8Array(6));S.claim=[...r].map(x=>a[x%a.length]).join("")}
+ S.final={value:v[5],mean:s.mean,sd:s.sd,score:s.score};S.done=true;S.tEnd=Date.now();save();
+ V.innerHTML=`<h2>Your result</h2><div class="wrap"><table>
+ <tr><td>Final portfolio value</td><td class="num">${fmtCHF(v[5])}</td></tr>
+ <tr><td>Average quarterly return</td><td class="num">${(s.mean*100).toFixed(2)}%</td></tr>
+ <tr><td>Standard deviation</td><td class="num">${(s.sd*100).toFixed(2)}%</td></tr>
+ <tr><td><strong>Your score</strong></td><td class="num"><strong>${s.score.toFixed(3)}</strong></td></tr>
+ <tr><td class="muted">Fund held at 100% throughout</td><td class="num muted">${b.score.toFixed(3)}</td></tr></table></div>
+ <p>Your claim code:</p><p class="code">${S.claim}</p>
+ <p class="muted">Keep this code. We announce the winning code at the end of the session. You can also use it to ask us to delete your answers.</p>
+ <p id="sent" class="muted">Saving your answers…</p>
+ <p>Thank you for taking part. Please wait quietly. We will explain the study once everyone has finished.</p>`;
+ send("complete",5).then(ok=>{const e=document.getElementById("sent");if(ok)e.textContent=LIVE?"Your answers have been saved.":"Test mode: nothing was sent.";
+  else{e.className="err";e.textContent="Your answers could not be saved. Please keep this page open and try again.";
+   const b=document.createElement("button");b.textContent="Try again";b.onclick=()=>{b.remove();R.end()};e.after(b)}})},
+post(){V.innerHTML=`<h2>Last questions</h2>
+ <fieldset><legend>At your last decision, where did the fund stand against its starting value?</legend>${radios("recall",[["a","90.6% of start (−9.4%)"],["b","85.6% of start (−14.4%)"],["c","80.6% of start (−19.4%)"],["d","75.6% of start (−24.4%)"]])}</fieldset>
+ <fieldset><legend>How did the market updates feel to you? (1 = very negative, 7 = very positive)</legend><div class="scale">${radios("tone",[1,2,3,4,5,6,7].map(i=>[i,i]))}</div></fieldset>
+ <p>Would you accept each coin flip? It is 50% win, 50% lose, and you play it once.</p>
+ ${GAMBLES.map(l=>`<fieldset><legend>Win CHF 6 or lose CHF ${l}</legend><div class="alloc" style="grid-template-columns:1fr 1fr">${["accept","reject"].map(a=>`<label><input type="radio" name="g${l}" id="g${l}_${a}" value="${a}"><span>${a[0].toUpperCase()+a.slice(1)}</span></label>`).join("")}</div></fieldset>`).join("")}
+ <fieldset><legend><label for="ce">You hold a ticket: 50% chance of CHF 100, 50% chance of nothing. What is the lowest sure amount, in CHF, for which you would sell it?</label></legend><input type="number" id="ce" min="0" max="100" step="1" inputmode="numeric"></fieldset>
+ <fieldset><legend>Before today, had you heard of framing effects?</legend>${radios("heard",[["yes","Yes"],["no","No"]])}</fieldset>
+ <fieldset><legend><label for="guess">What do you think this study tests? (optional)</label></legend><textarea id="guess" rows="2" maxlength="300"></textarea></fieldset>
+ <button id="n">See my result</button>`;
+ const names=["recall","tone","heard",...GAMBLES.map(g=>"g"+g)],ce=document.getElementById("ce");
+ const ck=()=>{const c=ce.value!==""&&+ce.value>=0&&+ce.value<=100;n.disabled=!(names.every(val)&&c)};V.addEventListener("change",ck);ce.oninput=ck;ck();
+ n.onclick=()=>{S.post={recall:val("recall"),tone:+val("tone"),heard:val("heard"),ce:+ce.value,guess:document.getElementById("guess").value.slice(0,300)};GAMBLES.forEach(g=>S.post["g"+g]=val("g"+g));go("end")}}
+};
+function round(q){const t=Date.now(),v=wealthPath(S.w.concat([0,0,0,0,0]).slice(0,5))[q],lines=q>0?frameLines(S.vFrame,fundIndex(q),v):null;
+ V.innerHTML=`<h2>${q===0?"Your starting decision":"Quarter "+q+" update"}</h2><p class="news">${NEWS[q]}</p>
+ ${lines?`<div class="state">${lines.map(l=>`<p>${l}</p>`).join("")}</div>`:`<div class="state"><p>You hold <strong class="num">CHF 10,000</strong>.</p></div>`}
+ ${q===3?`<p class="prob">${probLine(S.pFrame)}</p>`:""}
+ ${q>0?`<p class="muted">Your choice for last quarter: <span class="num">${S.w[q-1]}%</span> in the fund.</p>`:""}
+ <fieldset><legend>How much of your portfolio do you want in the fund for ${q===4?"the final":"the coming"} quarter?</legend><div class="alloc">${ALLOC.map(a=>`<label><input type="radio" name="a" id="a${a}" value="${a}"><span>${a}%</span></label>`).join("")}</div></fieldset>
+ <button id="n">Confirm</button>`;need(["a"],n);
+ n.onclick=()=>{S.w[q]=+val("a");S.rt[q]=Date.now()-t;send("r"+q);go(q<4?"r"+(q+1):"post")}}
+function render(){chrome();const m=/^r(\d)$/.exec(S.screen);m?round(+m[1]):R[S.screen]()}
+/* ---------- Boot ---------- */
+(function(){
+ if(LIVE){
+  if(S&&S.done){V.innerHTML="<h2>You have already taken part</h2><p>Thank you. Each person can take part once.</p>";return}
+  if(S){render();return}
+  V.innerHTML="<p>Loading…</p>";
+  assignCell().then(a=>{S=fresh(a.cell,"live",a.how);save();render()});return}
+ const box=document.getElementById("testnote");box.hidden=false;
+ box.innerHTML=`Test mode: nothing is stored or sent. Condition: <select id="c" aria-label="Condition"><option value="0">Loss / P-neg</option><option value="1">Retained / P-neg</option><option value="2">Loss / P-pos</option><option value="3">Retained / P-pos</option></select> <button id="rs" style="padding:4px 10px;font-size:13px">Restart</button>`;
+ const start=()=>{S=fresh(+document.getElementById("c").value,"test");save();render()};
+ document.getElementById("rs").onclick=start;
+ if(S&&S.mode==="test"&&S.screen!=="end"){document.getElementById("c").value=(S.vFrame==="R"?1:0)+(S.pFrame==="P"?2:0);render()}else start();
+})();
+</script>
+
+</body></html>
