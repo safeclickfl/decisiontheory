@@ -71,8 +71,7 @@ table{border-collapse:collapse;width:100%;font-size:16px}td{padding:9px 0;border
 /* ---------- CONFIG: edit these lines before going live ---------- */
 const CONFIG={
   ENDPOINT:"https://script.google.com/macros/s/AKfycbwQkyLpNmdGl_9PMWV5d_qGHyuOxY2krJINx4GL2UA77lND9GEx6D2SBsgAbIf0swyk/exec",                     // Google Apps Script web-app URL. Empty = test mode, nothing is sent.
-  PRIZE:"a box of chocolates",      // what the highest score wins
-  VERSION:"2.3"
+  VERSION:"2.4"
 };
 /* ---------- Scenario: fixed, identical for every participant ---------- */
 const START=10000, ALLOC=[0,25,50,75,100];
@@ -165,7 +164,7 @@ intro(){V.innerHTML=`<h2>How the simulation works</h2>
  <div class="formula"><small>Your score</small>average quarterly return ÷ standard deviation of quarterly returns</div>
  <ul><li>This is your portfolio's average return over the 5 quarters, divided by how much those returns varied.</li><li>If your average return is negative, Score = average × standard deviation, so extra risk can never improve a losing result.</li><li>If you hold only cash for all 5 quarters, your score is 0.</li></ul>
  <p class="muted">For orientation: from 1928 to 2025 the S&amp;P 500 returned about 11.9% a year with a standard deviation of about 19.4%, while US T-bills returned about 3.4%. That is a Sharpe ratio of roughly 0.4 a year, or about 0.2 a quarter. Past results do not predict this scenario.</p>
- <p>The highest score wins ${CONFIG.PRIZE}. Ties are decided by lot.</p>
+ <p>Try to reach the highest score you can.</p>
  <button id="n">Continue</button>`;n.onclick=()=>go("check")},
 check(){const Q=[["c1","1. Your portfolio is CHF 10,000 with 50% in the fund. The fund falls 10% this quarter. What is your portfolio worth?",[["a","CHF 9,000"],["b","CHF 9,500"],["c","CHF 10,000"]],"b","Only half of your money is in the fund. A 10% fall on CHF 5,000 costs CHF 500."],
   ["c2","2. Portfolios A and B have the same positive average return. A's returns vary less than B's. Which has the higher score?",[["a","Portfolio A"],["b","Portfolio B"],["c","They score the same"]],"a","The score divides the return by the variation, so less variation gives a higher score."],
@@ -184,7 +183,7 @@ end(){const w=S.w,v=wealthPath(w),s=score(w),b=score([100,100,100,100,100]);
  <tr><td>Standard deviation</td><td class="num">${(s.sd*100).toFixed(2)}%</td></tr>
  <tr><td class="muted">Score with 100% in the fund throughout</td><td class="num muted">${b.score.toFixed(3)}</td></tr></table></div>
  <p>Your claim code:</p><p class="code">${S.claim}</p>
- <p class="muted">Keep this code. We announce the winning code at the end of the session. You can also use it to ask us to delete your answers.</p>
+ <p class="muted">Keep this code. If you want your answers deleted, tell us this code.</p>
  <p id="sent" class="muted">Saving your answers…</p>
  <p>Thank you for taking part. Please wait quietly. We will explain the study once everyone has finished.</p>`;
  send("complete",5).then(ok=>{const e=document.getElementById("sent");if(ok)e.textContent=LIVE?"Your answers have been saved.":"Test mode: nothing was sent.";
