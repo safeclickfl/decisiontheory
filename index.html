@@ -2,53 +2,77 @@
 <title>Same Market, Different Decisions</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: one calm column, styled like a quarterly fund statement. No red or green anywhere: colour must not act as a second treatment. */
-:root{--bg:#f3f5f6;--paper:#fff;--ink:#17242b;--muted:#566872;--line:#d3dbdf;--accent:#1f5673;--accent-ink:#fff;--soft:#e6eef2;--warn:#6a5a1f;--warn-bg:#f6f0d9;
---display:"IBM Plex Serif",Georgia,serif;--body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10181d;--paper:#18232a;--ink:#e6edf0;--muted:#9fb0b9;--line:#2f3f48;--accent:#7fb8d6;--accent-ink:#0d171c;--soft:#22323b;--warn:#e7d690;--warn-bg:#39331a;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#10181d;--paper:#18232a;--ink:#e6edf0;--muted:#9fb0b9;--line:#2f3f48;--accent:#7fb8d6;--accent-ink:#0d171c;--soft:#22323b;--warn:#e7d690;--warn-bg:#39331a;color-scheme:dark}
-body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-main{max-width:640px;margin:0 auto;display:grid;gap:16px}
-header{display:flex;justify-content:space-between;gap:12px;font:500 12px/1.4 var(--mono);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
-.sheet{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:24px;display:grid;gap:16px;min-width:0}
-h1,h2{font-family:var(--display);font-weight:500;line-height:1.2;margin:0;text-wrap:balance}h1{font-size:28px}h2{font-size:22px}
-p,ul,ol{margin:0}ul,ol{padding-left:20px;display:grid;gap:6px}
-.muted{color:var(--muted);font-size:14px}.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.state{border-block:1px solid var(--line);padding-block:14px;display:grid;gap:10px}
-.state p{font-size:18px}.state strong{font-weight:600}
-.news{font-family:var(--display);font-size:19px}.prob{background:var(--soft);padding:12px 14px;border-radius:3px}
-fieldset{border:0;padding:0;margin:0;display:grid;gap:8px;min-width:0}legend{font-weight:600;padding:0;margin-bottom:8px}
+/* Layout: a petrol report band carries the quarter timeline; one statement sheet overlaps it. No red or green anywhere: colour must not act as a second treatment. */
+:root{--bg:#eef2f2;--paper:#fff;--ink:#12262e;--muted:#566a73;--line:#d5dee0;--band:#0f3440;--band-ink:#e9f2f3;--band-muted:#9dbcc4;--accent:#0f5c6e;--accent-ink:#fff;--brass:#c79a3b;--soft:#e7f0f1;--warn:#6a5a1f;--warn-bg:#f6f0d9;
+--body:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1a20;--paper:#14262e;--ink:#e6eff1;--muted:#9fb4bb;--line:#2b434c;--band:#0a2f3b;--band-ink:#e9f2f3;--band-muted:#8fb2bb;--accent:#79c3d3;--accent-ink:#08222a;--brass:#d9b25c;--soft:#1d3640;--warn:#e7d690;--warn-bg:#39331a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0c1a20;--paper:#14262e;--ink:#e6eff1;--muted:#9fb4bb;--line:#2b434c;--band:#0a2f3b;--band-ink:#e9f2f3;--band-muted:#8fb2bb;--accent:#79c3d3;--accent-ink:#08222a;--brass:#d9b25c;--soft:#1d3640;--warn:#e7d690;--warn-bg:#39331a;color-scheme:dark}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--body);padding-block:0 48px}
+.pad{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.band{background:var(--band);color:var(--band-ink);padding-block:18px 64px}
+.inner{max-width:640px;margin:0 auto;display:grid;gap:16px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font:500 12px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--band-muted)}
+.top b{color:var(--band-ink);font-weight:600}
+#tl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+#tl li{display:grid;gap:6px;font:500 12px var(--mono);color:var(--band-muted)}
+#tl li::before{content:"";height:4px;border-radius:2px;background:rgba(255,255,255,.2)}
+#tl li.past::before{background:var(--band-muted)}#tl li.now::before{background:var(--brass)}#tl li.now{color:var(--band-ink);font-weight:600}
+main{max-width:640px;margin:-44px auto 0;display:grid;gap:12px}
+.sheet{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:26px 24px;display:grid;gap:18px;min-width:0;box-shadow:0 10px 30px -18px rgba(8,34,42,.45)}
+h1,h2,h3{font-weight:700;letter-spacing:-.015em;line-height:1.15;margin:0;text-wrap:balance}h1{font-size:32px}h2{font-size:25px}h3{font-size:19px}
+p,ul,ol{margin:0}.sheet ul,.sheet ol{padding-left:20px;display:grid;gap:7px}
+.muted{color:var(--muted);font-size:15px}.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font:600 11.5px/1.3 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.news{font-size:21px;line-height:1.3;font-weight:500;letter-spacing:-.01em}
+.state{display:grid;border-radius:8px;background:var(--soft);overflow:hidden}
+.row{display:grid;gap:3px;padding:14px 16px}.row+.row{border-top:1px solid var(--bg)}
+.row p{font-size:18px;line-height:1.4}.row strong{font-weight:600}
+.prob{border:1px solid var(--line);border-left:3px solid var(--brass);padding:12px 14px;border-radius:4px}
+.formula{background:var(--band);color:var(--band-ink);padding:16px;border-radius:8px;font:500 15px/1.5 var(--mono);text-align:center}
+.formula small{display:block;color:var(--band-muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+fieldset{border:0;padding:0;margin:0;display:grid;gap:8px;min-width:0}legend{font-weight:600;padding:0;margin-bottom:8px;line-height:1.35}
 .alloc{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.alloc label,.opt{cursor:pointer}.alloc input,.opt input{position:absolute;opacity:0}
-.alloc span{display:block;text-align:center;padding:12px 0;border:1px solid var(--line);border-radius:3px;font:500 15px var(--mono)}
+.alloc label,.opt{cursor:pointer}.alloc label{position:relative}.alloc input,.opt input{position:absolute;opacity:0}
+.alloc span{display:block;text-align:center;padding:14px 0;border:1px solid var(--line);border-radius:8px;font:600 15px var(--mono);transition:background .12s,border-color .12s}
+.alloc label:hover span,.opt:hover span{border-color:var(--accent)}
 .alloc input:checked+span{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .alloc input:focus-visible+span,.opt input:focus-visible+span,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.opt{display:block;position:relative}.opt span{display:block;padding:10px 12px;border:1px solid var(--line);border-radius:3px}
-.opt input:checked+span{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 1px var(--accent)}
-.scale{display:grid;grid-template-columns:repeat(auto-fit,minmax(38px,1fr));gap:4px}.scale .opt span{text-align:center;padding:9px 0;font-family:var(--mono)}
-button{font:600 16px var(--body);background:var(--accent);color:var(--accent-ink);border:0;border-radius:3px;padding:12px 18px;cursor:pointer;justify-self:start}
-button:disabled{opacity:.45;cursor:not-allowed}
-input[type=number],textarea{font:16px var(--body);background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:3px;padding:10px;width:100%;max-width:100%;box-sizing:border-box}
-table{border-collapse:collapse;width:100%;font-size:15px}td,th{text-align:left;padding:7px 0;border-bottom:1px solid var(--line)}td:last-child,th:last-child{text-align:right}
-.note{background:var(--warn-bg);color:var(--warn);padding:10px 12px;border-radius:3px;font-size:14px}
-.err{color:var(--warn);font-size:15px;font-weight:600}.code{font:500 20px var(--mono);letter-spacing:.06em;user-select:all}
-.wrap{overflow-x:auto}.bar{height:4px;background:var(--line);border-radius:2px}.bar i{display:block;height:100%;background:var(--accent);border-radius:2px}
+.split{display:grid;gap:6px}.track{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--line)}
+.track i{display:block;height:100%;background:var(--accent);transition:width .18s}.track b{display:block;flex:1;background:var(--brass);opacity:.55}
+.legend{display:flex;justify-content:space-between;font:500 13px var(--mono);color:var(--muted)}
+.opt{display:block;position:relative}.opt span{display:flex;gap:10px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:8px}
+.opt span::before{content:"";flex:none;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--muted);box-sizing:border-box}
+.opt input[type=checkbox]+span::before{border-radius:4px}
+.opt input:checked+span{border-color:var(--accent);background:var(--soft)}.opt input:checked+span::before{border:5px solid var(--accent)}
+.scale{display:grid;grid-template-columns:repeat(auto-fit,minmax(40px,1fr));gap:4px}.scale .opt span{justify-content:center;padding:11px 0;font-family:var(--mono)}.scale .opt span::before{display:none}
+button{font:600 17px var(--body);background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;padding:14px 22px;cursor:pointer;width:100%;transition:opacity .12s}
+button:disabled{opacity:.4;cursor:not-allowed}
+input[type=number],textarea{font:16px var(--body);background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:12px;width:100%;box-sizing:border-box}
+table{border-collapse:collapse;width:100%;font-size:16px}td{padding:9px 0;border-bottom:1px solid var(--line)}td:last-child{text-align:right}
+.hero{background:var(--band);color:var(--band-ink);border-radius:8px;padding:20px;display:grid;gap:2px}.hero .big{font:600 44px/1.1 var(--mono)}.hero small{color:var(--band-muted);font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.note{background:var(--warn-bg);color:var(--warn);padding:10px 12px;border-radius:8px;font-size:14px}.note button{width:auto;min-width:0;padding:4px 12px;font-size:13px;margin-left:6px}
+.err{color:var(--warn);background:var(--warn-bg);padding:8px 10px;border-radius:6px;font-size:15px}.code{font:600 24px var(--mono);letter-spacing:.1em;user-select:all}
+.wrap{overflow-x:auto}#prog{display:block;height:3px;background:var(--brass);width:0;transition:width .25s}
+@media (min-width:640px){button{width:auto;justify-self:start;min-width:180px}.sheet{padding:32px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
-<main>
-<header><span>Decision Theory study</span><span id="step"></span></header>
-<div class="bar"><i id="prog" style="width:0"></i></div>
+<div class="band pad"><div class="inner"><div class="top"><span><b>Decision Theory</b> study</span><span id="step"></span></div>
+<ol id="tl" hidden><li>Q1</li><li>Q2</li><li>Q3</li><li>Q4</li><li>Q5</li></ol></div></div>
+<div class="pad"><main>
 <div id="testnote" class="note" hidden></div>
 <section class="sheet" id="view" aria-live="polite"></section>
-</main>
+</main></div>
+<i id="prog" style="position:fixed;left:0;top:0;z-index:5"></i>
 <script>
 "use strict";
 /* ---------- CONFIG: edit these lines before going live ---------- */
 const CONFIG={
   ENDPOINT:"https://script.google.com/macros/s/AKfycbwQkyLpNmdGl_9PMWV5d_qGHyuOxY2krJINx4GL2UA77lND9GEx6D2SBsgAbIf0swyk/exec",                     // Google Apps Script web-app URL. Empty = test mode, nothing is sent.
   PRIZE:"a box of chocolates",      // what the highest score wins
-  VERSION:"2.0"
+  VERSION:"2.3"
 };
 /* ---------- Scenario: fixed, identical for every participant ---------- */
 const START=10000, ALLOC=[0,25,50,75,100];
@@ -94,7 +118,7 @@ const LIVE=!!CONFIG.ENDPOINT;
 const KEY=LIVE?"smdd_live":"smdd_test";
 function randomToken(){const a="abcdefghijklmnopqrstuvwxyz0123456789",r=crypto.getRandomValues(new Uint8Array(10));return[...r].map(x=>a[x%a.length]).join("")}
 /* Balanced assignment comes from the sheet script. If it cannot be reached, assign by coin flip and record that. */
-async function assignCell(){try{const c=new AbortController(),t=setTimeout(()=>c.abort(),6000);
+async function assignCell(){try{const c=new AbortController(),t=setTimeout(()=>c.abort(),10000);
   const r=await fetch(CONFIG.ENDPOINT+"?action=assign",{signal:c.signal});clearTimeout(t);const j=await r.json();
   if(Number.isInteger(j.cell)&&j.cell>=0&&j.cell<4)return{cell:j.cell,how:"server"}}catch(e){}
   return{cell:crypto.getRandomValues(new Uint8Array(1))[0]%4,how:"client"}}
@@ -112,7 +136,8 @@ const V=document.getElementById("view");
 const ORDER=["consent","pre","intro","check","r0","r1","r2","r3","r4","post","end"];
 function go(s){S.screen=s;save();render();window.scrollTo(0,0)}
 function chrome(){const i=ORDER.indexOf(S.screen);document.getElementById("prog").style.width=(i/(ORDER.length-1)*100)+"%";
-  const m=/^r(\d)$/.exec(S.screen);document.getElementById("step").textContent=m?`Quarter ${+m[1]+1} of 5`:""}
+  const m=/^r(\d)$/.exec(S.screen),tl=document.getElementById("tl");document.getElementById("step").textContent=m?`Decision ${+m[1]+1} of 5`:"";
+  tl.hidden=!m;if(m)[...tl.children].forEach((li,i)=>{li.className=i<+m[1]?"past":i===+m[1]?"now":""})}
 const radios=(name,opts,cls="")=>opts.map((o,i)=>`<label class="opt"><input type="radio" name="${name}" id="${name}_${i}" value="${o[0]}"><span>${o[1]}</span></label>`).join("");
 const val=n=>{const e=document.querySelector(`input[name="${n}"]:checked`);return e?e.value:null};
 function need(names,btn){const f=()=>{btn.disabled=!names.every(val)};V.addEventListener("change",f);f()}
@@ -135,38 +160,38 @@ intro(){V.innerHTML=`<h2>How the simulation works</h2>
  <ul><li><strong>Equity fund:</strong> a broadly diversified, currency-hedged fund that tracks the S&amp;P 500.</li><li><strong>Cash:</strong> earns 0%.</li></ul>
  <p>Each quarter you pick 0%, 25%, 50%, 75% or 100% in the fund. You may raise or lower this every quarter, at no cost. Your choice applies to the coming quarter.</p>
  <p>The market path is fixed in advance and is the same for every participant. It is a constructed scenario, not a replay of a specific historical period, and you only see each quarter after you have decided.</p>
- <h2>Your goal: the highest Sharpe ratio</h2>
+ <h3>Your goal: the highest Sharpe ratio</h3>
  <p>You are scored on risk-adjusted return, so a high return alone is not enough:</p>
- <p class="prob"><strong>Score = average quarterly return ÷ standard deviation of quarterly returns</strong></p>
+ <div class="formula"><small>Your score</small>average quarterly return ÷ standard deviation of quarterly returns</div>
  <ul><li>This is your portfolio's average return over the 5 quarters, divided by how much those returns varied.</li><li>If your average return is negative, Score = average × standard deviation, so extra risk can never improve a losing result.</li><li>If you hold only cash for all 5 quarters, your score is 0.</li></ul>
  <p class="muted">For orientation: from 1928 to 2025 the S&amp;P 500 returned about 11.9% a year with a standard deviation of about 19.4%, while US T-bills returned about 3.4%. That is a Sharpe ratio of roughly 0.4 a year, or about 0.2 a quarter. Past results do not predict this scenario.</p>
  <p>The highest score wins ${CONFIG.PRIZE}. Ties are decided by lot.</p>
  <button id="n">Continue</button>`;n.onclick=()=>go("check")},
-check(){V.innerHTML=`<h2>Quick check</h2><p class="muted">These questions make sure the rules are clear. You can try again.</p>
- <fieldset><legend>1. Your portfolio is CHF 10,000 with 50% in the fund. The fund falls 10% this quarter. What is your portfolio worth?</legend>${radios("c1",[["a","CHF 9,000"],["b","CHF 9,500"],["c","CHF 10,000"]])}</fieldset>
- <fieldset><legend>2. Two portfolios have the same average return. Which has the higher score?</legend>${radios("c2",[["a","The one with lower variation in returns"],["b","The one with higher variation in returns"],["c","They always score the same"]])}</fieldset>
- <fieldset><legend>3. When does your choice for a quarter take effect?</legend>${radios("c3",[["a","On the quarter that just ended"],["b","On the coming quarter"]])}</fieldset>
- <p id="e" class="err" hidden>At least one answer is wrong. Please check the rules and try again.</p>
- <button id="n">Check answers</button>`;need(["c1","c2","c3"],n);n.onclick=()=>{S.comp.attempts++;save();
-  if(val("c1")==="b"&&val("c2")==="a"&&val("c3")==="b"){send("comprehension");go("r0")}else e.hidden=false}},
+check(){const Q=[["c1","1. Your portfolio is CHF 10,000 with 50% in the fund. The fund falls 10% this quarter. What is your portfolio worth?",[["a","CHF 9,000"],["b","CHF 9,500"],["c","CHF 10,000"]],"b","Only half of your money is in the fund. A 10% fall on CHF 5,000 costs CHF 500."],
+  ["c2","2. Portfolios A and B have the same positive average return. A's returns vary less than B's. Which has the higher score?",[["a","Portfolio A"],["b","Portfolio B"],["c","They score the same"]],"a","The score divides the return by the variation, so less variation gives a higher score."],
+  ["c3","3. When does your choice for a quarter take effect?",[["a","On the quarter that just ended"],["b","On the coming quarter"]],"b","You decide first. The market moves afterwards."]];
+ V.innerHTML=`<h2>Quick check</h2><p class="muted">These questions make sure the rules are clear. If an answer is wrong, you will see why and can change it.</p>
+ ${Q.map(q=>`<fieldset><legend>${q[1]}</legend>${radios(q[0],q[2])}<p id="h_${q[0]}" class="err" hidden>${q[4]}</p></fieldset>`).join("")}
+ <button id="n">Check answers</button>`;need(Q.map(q=>q[0]),n);n.onclick=()=>{S.comp.attempts++;S.comp.wrong=S.comp.wrong||{};let ok=true;
+  Q.forEach(q=>{const bad=val(q[0])!==q[3];document.getElementById("h_"+q[0]).hidden=!bad;if(bad){ok=false;S.comp.wrong[q[0]]=(S.comp.wrong[q[0]]||0)+1}});save();
+  if(ok){send("comprehension");go("r0")}}},
 end(){const w=S.w,v=wealthPath(w),s=score(w),b=score([100,100,100,100,100]);
  if(!S.claim){const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789",r=crypto.getRandomValues(new Uint8Array(6));S.claim=[...r].map(x=>a[x%a.length]).join("")}
  S.final={value:v[5],mean:s.mean,sd:s.sd,score:s.score};S.done=true;S.tEnd=Date.now();save();
- V.innerHTML=`<h2>Your result</h2><div class="wrap"><table>
+ V.innerHTML=`<h2>Your result</h2><div class="hero"><small>Your score</small><span class="big">${s.score.toFixed(3)}</span></div><div class="wrap"><table>
  <tr><td>Final portfolio value</td><td class="num">${fmtCHF(v[5])}</td></tr>
  <tr><td>Average quarterly return</td><td class="num">${(s.mean*100).toFixed(2)}%</td></tr>
  <tr><td>Standard deviation</td><td class="num">${(s.sd*100).toFixed(2)}%</td></tr>
- <tr><td><strong>Your score</strong></td><td class="num"><strong>${s.score.toFixed(3)}</strong></td></tr>
- <tr><td class="muted">Fund held at 100% throughout</td><td class="num muted">${b.score.toFixed(3)}</td></tr></table></div>
+ <tr><td class="muted">Score with 100% in the fund throughout</td><td class="num muted">${b.score.toFixed(3)}</td></tr></table></div>
  <p>Your claim code:</p><p class="code">${S.claim}</p>
  <p class="muted">Keep this code. We announce the winning code at the end of the session. You can also use it to ask us to delete your answers.</p>
  <p id="sent" class="muted">Saving your answers…</p>
  <p>Thank you for taking part. Please wait quietly. We will explain the study once everyone has finished.</p>`;
  send("complete",5).then(ok=>{const e=document.getElementById("sent");if(ok)e.textContent=LIVE?"Your answers have been saved.":"Test mode: nothing was sent.";
   else{e.className="err";e.textContent="Your answers could not be saved. Please keep this page open and try again.";
-   const b=document.createElement("button");b.textContent="Try again";b.onclick=()=>{b.remove();R.end()};e.after(b)}})},
+   const b=document.createElement("button");b.textContent="Save again";b.onclick=()=>{b.remove();R.end()};e.after(b)}})},
 post(){V.innerHTML=`<h2>Last questions</h2>
- <fieldset><legend>At your last decision, where did the fund stand against its starting value?</legend>${radios("recall",[["a","90.6% of start (−9.4%)"],["b","85.6% of start (−14.4%)"],["c","80.6% of start (−19.4%)"],["d","75.6% of start (−24.4%)"]])}</fieldset>
+ <fieldset><legend>At your last decision, where did the fund itself (not your own portfolio) stand against its starting value?</legend>${radios("recall",[["a","90.6% of start (−9.4%)"],["b","85.6% of start (−14.4%)"],["c","80.6% of start (−19.4%)"],["d","75.6% of start (−24.4%)"]])}</fieldset>
  <fieldset><legend>How did the market updates feel to you? (1 = very negative, 7 = very positive)</legend><div class="scale">${radios("tone",[1,2,3,4,5,6,7].map(i=>[i,i]))}</div></fieldset>
  <p>Would you accept each coin flip? It is 50% win, 50% lose, and you play it once.</p>
  ${GAMBLES.map(l=>`<fieldset><legend>Win CHF 6 or lose CHF ${l}</legend><div class="alloc" style="grid-template-columns:1fr 1fr">${["accept","reject"].map(a=>`<label><input type="radio" name="g${l}" id="g${l}_${a}" value="${a}"><span>${a[0].toUpperCase()+a.slice(1)}</span></label>`).join("")}</div></fieldset>`).join("")}
@@ -179,18 +204,20 @@ post(){V.innerHTML=`<h2>Last questions</h2>
  n.onclick=()=>{S.post={recall:val("recall"),tone:+val("tone"),heard:val("heard"),ce:+ce.value,guess:document.getElementById("guess").value.slice(0,300)};GAMBLES.forEach(g=>S.post["g"+g]=val("g"+g));go("end")}}
 };
 function round(q){const t=Date.now(),v=wealthPath(S.w.concat([0,0,0,0,0]).slice(0,5))[q],lines=q>0?frameLines(S.vFrame,fundIndex(q),v):null;
- V.innerHTML=`<h2>${q===0?"Your starting decision":"Quarter "+q+" update"}</h2><p class="news">${NEWS[q]}</p>
- ${lines?`<div class="state">${lines.map(l=>`<p>${l}</p>`).join("")}</div>`:`<div class="state"><p>You hold <strong class="num">CHF 10,000</strong>.</p></div>`}
+ V.innerHTML=`<div style="display:grid;gap:6px"><span class="eyebrow">${q===0?"Before you begin":"Quarter "+q+" update"}</span><p class="news">${NEWS[q]}</p></div>
+ ${lines?`<div class="state"><div class="row"><span class="eyebrow">Fund</span><p>${lines[0]}</p></div><div class="row"><span class="eyebrow">Your portfolio</span><p>${lines[1]}</p></div></div>`:`<div class="state"><div class="row"><span class="eyebrow">Your portfolio</span><p>You hold <strong class="num">CHF\u00a010,000</strong>.</p></div></div>`}
  ${q===3?`<p class="prob">${probLine(S.pFrame)}</p>`:""}
- ${q>0?`<p class="muted">Your choice for last quarter: <span class="num">${S.w[q-1]}%</span> in the fund.</p>`:""}
  <fieldset><legend>How much of your portfolio do you want in the fund for ${q===4?"the final":"the coming"} quarter?</legend><div class="alloc">${ALLOC.map(a=>`<label><input type="radio" name="a" id="a${a}" value="${a}"><span>${a}%</span></label>`).join("")}</div></fieldset>
+ <div class="split"><div class="track"><i id="sw" style="width:0"></i><b></b></div><div class="legend"><span id="sf">Fund</span><span id="sc">Cash</span></div></div>
+ ${q>0?`<p class="muted">Last quarter you held <span class="num">${S.w[q-1]}%</span> in the fund.</p>`:""}
  <button id="n">Confirm</button>`;need(["a"],n);
+ V.querySelector(".alloc").addEventListener("change",()=>{const a=+val("a");document.getElementById("sw").style.width=a+"%";document.getElementById("sf").textContent=`Fund ${a}%`;document.getElementById("sc").textContent=`Cash ${100-a}%`});
  n.onclick=()=>{S.w[q]=+val("a");S.rt[q]=Date.now()-t;send("r"+q);go(q<4?"r"+(q+1):"post")}}
 function render(){chrome();const m=/^r(\d)$/.exec(S.screen);m?round(+m[1]):R[S.screen]()}
 /* ---------- Boot ---------- */
 (function(){
  if(LIVE){
-  if(S&&S.done){V.innerHTML="<h2>You have already taken part</h2><p>Thank you. Each person can take part once.</p>";return}
+  if(S&&S.done){const sc=S.final?S.final.score.toFixed(3):"";V.innerHTML=`<h2>You have already taken part</h2><p>Thank you. Each person can take part once.</p>${S.claim?`<div class="hero"><small>Your score</small><span class="big">${sc}</span></div><p>Your claim code:</p><p class="code">${S.claim}</p>`:""}`;return}
   if(S){render();return}
   V.innerHTML="<p>Loading…</p>";
   assignCell().then(a=>{S=fresh(a.cell,"live",a.how);save();render()});return}
